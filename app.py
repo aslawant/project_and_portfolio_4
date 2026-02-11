@@ -40,9 +40,7 @@ DEFAULT_VALUES = {
 }
 
 app = Flask(__name__)
-
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
-
 
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(
@@ -106,10 +104,7 @@ def load_genres_fallback() -> list[str]:
 
 
 def load_success_threshold() -> float:
-    """
-    Defines the Success/Flop cut line.
-    We'll use the median Revenue from your cleaned dataset.
-    """
+    """Defines Success/Flop cut line (median Revenue)."""
     if not os.path.exists(DATA_PATH):
         return 100_000_000.0
 
@@ -326,13 +321,12 @@ def common_context(values, result, error, engineered):
 
 
 @app.route("/", methods=["GET"])
+
 def index():
-    
     session.pop("result", None)
     session.pop("engineered", None)
     session.pop("values", None)
     session.pop("error", None)
-
     return render_template("index.html", **common_context(DEFAULT_VALUES, None, None, None))
 
 
@@ -348,7 +342,7 @@ def predict():
         pred_revenue = max(0.0, pred_revenue)
 
         is_success = pred_revenue >= SUCCESS_THRESHOLD
-        verdict = "Success" if is_success else "Flop"  
+        verdict = "Success" if is_success else "Flop"
 
         prob = success_probability(pred_log, LOG_RMSE, SUCCESS_THRESHOLD)
         prob = max(0.0, min(1.0, prob))
@@ -376,7 +370,6 @@ def predict():
         session["result"] = None
         session["engineered"] = None
         session["error"] = str(e)
-
         return redirect(url_for("results"))
 
 
@@ -388,6 +381,47 @@ def results():
     engineered = session.get("engineered", None)
 
     return render_template("results.html", **common_context(values, result, error, engineered))
+
+
+@app.route("/analytics", methods=["GET"])
+def analytics():
+    
+    if session.get("result") is None:
+        return redirect(url_for("index"))
+
+    values = session.get("values", DEFAULT_VALUES)
+    result = session.get("result", None)
+    error = session.get("error", None)
+    engineered = session.get("engineered", None)
+
+    pred_revenue = float(str(result["revenue_fmt"]).replace(",", "")) if result else 0.0
+
+    months = list(range(1, 13))
+    forecast = [pred_revenue * (m / 12.0) for m in months]
+
+    budgets = [100_000_000, 200_000_000, 300_000_000, 400_000_000, 500_000_000]
+    
+    impact_revenue = [b * 2.0 for b in budgets]  
+
+    top_genres = ["Action", "Adventure", "Comedy", "Drama", "Thriller"]
+    base_p = float(result["prob"]) if result else 0.5
+    genre_probs = [max(0.05, min(0.95, base_p + delta)) for delta in (0.08, 0.04, 0.00, -0.03, -0.07)]
+    genre_revs = [pred_revenue * (p / base_p) if base_p > 0 else pred_revenue for p in genre_probs]
+
+    dashboard = {
+        "months": months,
+        "forecast": [round(v / 1_000_000, 1) for v in forecast],  # in $M
+        "budgets_m": [int(b / 1_000_000) for b in budgets],
+        "impact_revenue_m": [round(v / 1_000_000, 0) for v in impact_revenue],
+        "top_genres": top_genres,
+        "genre_probs": [round(p * 100, 0) for p in genre_probs],
+        "genre_revs_m": [round(v / 1_000_000, 0) for v in genre_revs],
+    }
+
+    ctx = common_context(values, result, error, engineered)
+    ctx["dashboard"] = dashboard
+
+    return render_template("analytics.html", **ctx)
 
 
 if __name__ == "__main__":

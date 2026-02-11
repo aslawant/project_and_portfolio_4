@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Analytics Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <div>
+        <h1>Analytics Dashboard</h1>
+        <p class="sub">
+          Breakdown for your prediction • Threshold: ${{ threshold_fmt }}
+        </p>
+      </div>
+    </header>
+
+    <main class="main">
+
+      <section class="dash-grid">
+
+        <div class="card dash-card">
+          <div class="dash-head">
+            <div>
+              <h2 class="card-title">Revenue Forecast</h2>
+              <p class="muted">12-month projection (demo)</p>
+            </div>
+            <div class="pill-row">
+              <span class="pill active">1Y</span>
+              <span class="pill">6M</span>
+              <span class="pill">3M</span>
+              <span class="pill">1M</span>
+            </div>
+          </div>
+
+          <div class="mini-chart">
+            {% for v in dashboard.forecast %}
+              <div class="mini-bar" style="height: {{ (v / (dashboard.forecast[-1] if dashboard.forecast[-1] else 1)) * 100 }}%"></div>
+            {% endfor %}
+          </div>
+
+          <div class="muted fine">
+            Projected Revenue: <span class="mono">${{ result.revenue_fmt }}</span>
+          </div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-head">
+            <div>
+              <h2 class="card-title">Feature Importance</h2>
+              <p class="muted">Top drivers (if model supports it)</p>
+            </div>
+          </div>
+
+          {% if feature_importances %}
+            <div class="bars">
+              {% for item in feature_importances[:5] %}
+                <div class="bar-row">
+                  <div class="bar-label mono">{{ item.name }}</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: {{ item.pct }}%"></div>
+                  </div>
+                  <div class="bar-pct mono">{{ "%.0f"|format(item.pct) }}%</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="muted">Feature importance not available for this estimator.</p>
+          {% endif %}
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-head">
+            <div>
+              <h2 class="card-title">Budget Impact</h2>
+              <p class="muted">What-if curve (demo)</p>
+            </div>
+            <span class="pill active">Overall</span>
+          </div>
+
+          <div class="impact">
+            {% for i in range(dashboard.budgets_m|length) %}
+              <div class="impact-row">
+                <div class="mono impact-x">${{ dashboard.budgets_m[i] }}M</div>
+                <div class="impact-track">
+                  <div class="impact-fill" style="width: {{ (dashboard.impact_revenue_m[i] / (dashboard.impact_revenue_m[-1] if dashboard.impact_revenue_m[-1] else 1)) * 100 }}%"></div>
+                </div>
+                <div class="mono impact-y">${{ dashboard.impact_revenue_m[i] }}M</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-head">
+            <div>
+              <h2 class="card-title">Prediction Summary</h2>
+              <p class="muted">Quick read</p>
+            </div>
+          </div>
+
+          <div class="sf-toggle" style="margin-top: 0;">
+            <div class="sf-half {% if result.is_success %}active success{% endif %}">Success</div>
+            <div class="sf-half {% if not result.is_success %}active flop{% endif %}">Flop</div>
+          </div>
+
+          <div class="gauge" style="margin-top: 14px;">
+            <div class="gauge-label">
+              <span class="muted">Success Probability</span>
+              <span class="mono">{{ result.prob_fmt }}%</span>
+            </div>
+            <div class="gauge-track">
+              <div class="gauge-fill" style="width: {{ result.prob_fmt }}%"></div>
+            </div>
+          </div>
+
+          <div class="result-grid" style="margin-top: 14px;">
+            <div class="stat">
+              <div class="stat-label">Predicted Revenue</div>
+              <div class="stat-value mono">${{ result.revenue_fmt }}</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Verdict</div>
+              <div class="stat-value mono">{{ result.verdict }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-head">
+            <div>
+              <h2 class="card-title">Genre Performance</h2>
+              <p class="muted">Estimated performance by genre (demo)</p>
+            </div>
+            <span class="pill active">Overall</span>
+          </div>
+
+          <div class="genre-list">
+            {% for i in range(dashboard.top_genres|length) %}
+              <div class="genre-row">
+                <div class="genre-name">{{ dashboard.top_genres[i] }}</div>
+                <div class="genre-track">
+                  <div class="genre-fill" style="width: {{ dashboard.genre_probs[i] }}%"></div>
+                </div>
+                <div class="mono genre-pct">{{ dashboard.genre_probs[i] }}%</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card dash-card">
+          <div class="dash-head">
+            <div>
+              <h2 class="card-title">Genre Performance</h2>
+              <p class="muted">Success probability + revenue (demo)</p>
+            </div>
+            <span class="pill active">Overall</span>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Genre</th>
+                  <th>Success Probability</th>
+                  <th>Predicted Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in range(dashboard.top_genres|length) %}
+                  <tr>
+                    <td>{{ dashboard.top_genres[i] }}</td>
+                    <td class="mono">{{ dashboard.genre_probs[i] }}%</td>
+                    <td class="mono">${{ "{:,.0f}".format(dashboard.genre_revs_m[i]) }}M</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <div class="actions" style="margin-top: 14px;">
+        <a class="btn ghost" href="{{ url_for('results') }}">Back to Results</a>
+        <a class="btn" href="{{ url_for('index') }}">New Prediction</a>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

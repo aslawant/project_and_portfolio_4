@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <see name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prediction Results</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
@@ -11,14 +11,11 @@
     <header class="header">
       <div>
         <h1>Prediction Results</h1>
-        <p class="sub">
-          Threshold: ${{ threshold_fmt }}
-        </p>
+        <p class="sub">Threshold: ${{ threshold_fmt }}</p>
       </div>
     </header>
 
     <main class="main">
-
       {% if error %}
         <section class="card error">
           <h2 class="card-title">Error</h2>
@@ -71,7 +68,7 @@
 
           <div class="actions" style="margin-top: 14px;">
             <button class="btn ghost" onclick="window.location='/'">Back</button>
-            <button class="btn" onclick="alert('Analytics page coming next!')">View Analytics</button>
+            <a class="btn" href="{{ url_for('analytics') }}">View Analytics</a>
           </div>
 
           <p class="fine muted" style="margin-top: 12px;">
@@ -79,7 +76,6 @@
           </p>
         </section>
       {% endif %}
-
     </main>
   </div>
 </body>
