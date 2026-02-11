@@ -338,3 +338,34 @@ body{
   .bar-row{ grid-template-columns: 1fr; }
   .bar-pct{ text-align: left; }
 }
+
+.sf-toggle{
+  margin-top: 12px;
+  display: flex;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.06);
+}
+
+.sf-half{
+  flex: 1;
+  text-align: center;
+  padding: 12px 10px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  color: rgba(255,255,255,0.75);
+}
+
+.sf-half.active{
+  color: rgba(255,255,255,0.95);
+}
+
+.sf-half.active.success{
+  background: rgba(0,255,153,0.18);
+  border-right: 1px solid rgba(255,255,255,0.12);
+}
+
+.sf-half.active.flop{
+  background: rgba(255,77,77,0.18);
+}

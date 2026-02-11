@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prediction Results</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <div>
+        <h1>Prediction Results</h1>
+        <p class="sub">
+          Threshold: ${{ threshold_fmt }}
+        </p>
+      </div>
+    </header>
+
+    <main class="main">
+
+      {% if error %}
+        <section class="card error">
+          <h2 class="card-title">Error</h2>
+          <p>{{ error }}</p>
+
+          <div class="actions" style="margin-top: 14px;">
+            <button class="btn" onclick="window.location='/'">Back</button>
+          </div>
+        </section>
+      {% endif %}
+
+      {% if result %}
+        <section class="card result">
+          <div class="result-top">
+            <div>
+              <h2 class="card-title">Prediction</h2>
+              <p class="muted">This is based on the movie details you entered.</p>
+            </div>
+          </div>
+
+          <div class="sf-toggle">
+            <div class="sf-half {% if result.is_success %}active success{% endif %}">
+              Success
+            </div>
+            <div class="sf-half {% if not result.is_success %}active flop{% endif %}">
+              Flop
+            </div>
+          </div>
+
+          <div class="gauge">
+            <div class="gauge-label">
+              <span class="muted">Success Probability</span>
+              <span class="mono">{{ result.prob_fmt }}%</span>
+            </div>
+            <div class="gauge-track">
+              <div class="gauge-fill" style="width: {{ result.prob_fmt }}%"></div>
+            </div>
+          </div>
+
+          <div class="result-grid">
+            <div class="stat">
+              <div class="stat-label">Success Probability</div>
+              <div class="stat-value mono">{{ result.prob_fmt }}%</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Revenue Prediction</div>
+              <div class="stat-value mono">$ {{ result.revenue_fmt }}</div>
+            </div>
+          </div>
+
+          <div class="actions" style="margin-top: 14px;">
+            <button class="btn ghost" onclick="window.location='/'">Back</button>
+            <button class="btn" onclick="alert('Analytics page coming next!')">View Analytics</button>
+          </div>
+
+          <p class="fine muted" style="margin-top: 12px;">
+            Probability is estimated from model error (log-RMSE) and the success threshold.
+          </p>
+        </section>
+      {% endif %}
+
+    </main>
+  </div>
+</body>
+</html>

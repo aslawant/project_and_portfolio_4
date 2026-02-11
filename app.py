@@ -5,14 +5,13 @@ import joblib
 import numpy as np
 import pandas as pd
 from math import erf, sqrt
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for, session
 
 MODEL_PATH = "best_model.joblib"
 DATA_PATH = "data/movie_data_cleaned.csv"
 
-
-DATASET_NAME = "TMDB 5000 Movies"   
-MODEL_DISPLAY_NAME = None          
+DATASET_NAME = "TMDB 5000 Movies"
+MODEL_DISPLAY_NAME = None
 
 R2_SCORE = 0.81
 RMSE_USD = 45_000_000
@@ -42,6 +41,9 @@ DEFAULT_VALUES = {
 
 app = Flask(__name__)
 
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
+
+
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(
         f"Could not find {MODEL_PATH}. "
@@ -61,17 +63,22 @@ else:
 
 ALL_FEATURES = NUM_FEATURES + CAT_FEATURES
 
+
 def safe_float(x) -> float:
     return float(x)
+
 
 def safe_int(x) -> int:
     return int(float(x))
 
+
 def month_to_quarter(month: int) -> int:
     return int((month - 1) // 3 + 1)
 
+
 def format_money(n: float) -> str:
     return f"{n:,.0f}"
+
 
 def load_genres_fallback() -> list[str]:
     if os.path.exists(DATA_PATH):
@@ -97,6 +104,7 @@ def load_genres_fallback() -> list[str]:
         "Romance", "Science Fiction", "TV Movie", "Thriller", "War", "Western"
     ]
 
+
 def load_success_threshold() -> float:
     """
     Defines the Success/Flop cut line.
@@ -120,6 +128,7 @@ def norm_cdf(z: float) -> float:
     """Standard normal CDF using erf (no scipy needed)."""
     return 0.5 * (1.0 + erf(z / sqrt(2.0)))
 
+
 def success_probability(pred_log: float, log_rmse: float, success_threshold: float) -> float:
     """
     P(Revenue >= success_threshold) assuming:
@@ -132,6 +141,7 @@ def success_probability(pred_log: float, log_rmse: float, success_threshold: flo
     z = (thresh_log - pred_log) / log_rmse
     return float(1.0 - norm_cdf(z))
 
+
 def pretty_feature_name(name: str) -> str:
     name = name.replace("num__", "").replace("cat__", "")
     name = name.replace("_", " ").strip()
@@ -139,6 +149,7 @@ def pretty_feature_name(name: str) -> str:
     name = name.replace("Vote Average", "Vote Avg")
     name = name.replace("Genres", "Genre")
     return name
+
 
 def _extract_estimator_and_feature_names(m):
     estimator = m
@@ -172,6 +183,7 @@ def _extract_estimator_and_feature_names(m):
                 feature_names = ALL_FEATURES
 
     return estimator, feature_names
+
 
 def get_top_feature_importances(m, top_n: int = 10):
     estimator, feature_names = _extract_estimator_and_feature_names(m)
@@ -282,6 +294,7 @@ def build_feature_row(values: dict) -> pd.DataFrame:
 
     return pd.DataFrame([row], columns=ALL_FEATURES)
 
+
 def df_row_to_display_dict(df_row: pd.DataFrame) -> dict:
     r = df_row.iloc[0].to_dict()
 
@@ -293,6 +306,7 @@ def df_row_to_display_dict(df_row: pd.DataFrame) -> dict:
         return str(v)
 
     return {k: fmt(r.get(k)) for k in ALL_FEATURES}
+
 
 def common_context(values, result, error, engineered):
     return dict(
@@ -310,9 +324,17 @@ def common_context(values, result, error, engineered):
         feature_importances=FEATURE_IMPORTANCES,
     )
 
+
 @app.route("/", methods=["GET"])
 def index():
+    
+    session.pop("result", None)
+    session.pop("engineered", None)
+    session.pop("values", None)
+    session.pop("error", None)
+
     return render_template("index.html", **common_context(DEFAULT_VALUES, None, None, None))
+
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -326,7 +348,7 @@ def predict():
         pred_revenue = max(0.0, pred_revenue)
 
         is_success = pred_revenue >= SUCCESS_THRESHOLD
-        verdict = "Successful" if is_success else "Flop"
+        verdict = "Success" if is_success else "Flop"  
 
         prob = success_probability(pred_log, LOG_RMSE, SUCCESS_THRESHOLD)
         prob = max(0.0, min(1.0, prob))
@@ -336,15 +358,36 @@ def predict():
             "revenue_fmt": format_money(pred_revenue),
             "verdict": verdict,
             "is_success": is_success,
+            "prob": prob,
             "prob_fmt": f"{prob * 100:.1f}",
         }
 
         engineered = df_row_to_display_dict(X_new)
 
-        return render_template("index.html", **common_context(values, result, None, engineered))
+        session["values"] = values
+        session["result"] = result
+        session["engineered"] = engineered
+        session["error"] = None
+
+        return redirect(url_for("results"))
 
     except Exception as e:
-        return render_template("index.html", **common_context(values, None, str(e), None))
+        session["values"] = values
+        session["result"] = None
+        session["engineered"] = None
+        session["error"] = str(e)
+
+        return redirect(url_for("results"))
+
+
+@app.route("/results", methods=["GET"])
+def results():
+    values = session.get("values", DEFAULT_VALUES)
+    result = session.get("result", None)
+    error = session.get("error", None)
+    engineered = session.get("engineered", None)
+
+    return render_template("results.html", **common_context(values, result, error, engineered))
 
 
 if __name__ == "__main__":

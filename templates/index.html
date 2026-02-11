@@ -12,7 +12,7 @@
       <div>
         <h1>Movie Success Predictor</h1>
         <p class="sub">
-          Predict estimated revenue and whether a movie is likely to be <span class="mono">Successful</span> or a <span class="mono">Flop</span>.
+          Enter movie details to predict success.
           <span class="hint">Threshold: ${{ threshold_fmt }}</span>
         </p>
       </div>
@@ -75,144 +75,7 @@
           </div>
         </form>
       </section>
-
-      {% if error %}
-        <section class="card error">
-          <h2 class="card-title">Error</h2>
-          <p>{{ error }}</p>
-        </section>
-      {% endif %}
-
-      {% if result %}
-        <section class="card result">
-          <div class="result-top">
-            <div>
-              <h2 class="card-title">Prediction</h2>
-              <p class="muted">Revenue estimate based on your inputs.</p>
-              <p class="fine">
-                Success threshold: <span class="mono">${{ threshold_fmt }}</span> •
-                log-RMSE: <span class="mono">{{ "%.3f"|format(log_rmse) }}</span>
-              </p>
-            </div>
-
-            {% if result.is_success %}
-              <span class="badge success">Successful</span>
-            {% else %}
-              <span class="badge flop">Flop</span>
-            {% endif %}
-          </div>
-
-          <div class="result-grid triple">
-            <div class="stat">
-              <div class="stat-label">Predicted Revenue_Log</div>
-              <div class="stat-value mono">{{ result.pred_log }}</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Estimated Revenue</div>
-              <div class="stat-value mono">${{ result.revenue_fmt }}</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Success Probability</div>
-              <div class="stat-value mono">{{ result.prob_fmt }}%</div>
-            </div>
-          </div>
-
-          
-          <div class="gauge">
-            <div class="gauge-label">
-              <span class="muted">Success Meter</span>
-              <span class="mono">{{ result.prob_fmt }}%</span>
-            </div>
-            <div class="gauge-track">
-              <div class="gauge-fill" style="width: {{ result.prob_fmt }}%"></div>
-            </div>
-          </div>
-
-          <p class="fine muted">
-            Probability is estimated from model error (log-RMSE) and the success threshold.
-          </p>
-        </section>
-      {% endif %}
-
-      {% if feature_importances %}
-        <section class="card">
-          <div class="table-head">
-            <h2 class="card-title">Feature Importance</h2>
-            <p class="muted">Top drivers for the model (when supported by the estimator).</p>
-          </div>
-
-          <div class="bars">
-            {% for item in feature_importances %}
-              <div class="bar-row">
-                <div class="bar-label mono">{{ item.name }}</div>
-                <div class="bar-track">
-                  <div class="bar-fill" style="width: {{ item.pct }}%"></div>
-                </div>
-                <div class="bar-pct mono">{{ "%.1f"|format(item.pct) }}%</div>
-              </div>
-            {% endfor %}
-          </div>
-        </section>
-      {% endif %}
-
-      
-      <section class="card">
-        <details class="details">
-          <summary class="details-summary">Model Info</summary>
-          <div class="details-body">
-            <p><span class="muted">Dataset:</span> <span class="mono">{{ dataset_name }}</span></p>
-            <p><span class="muted">Model:</span> <span class="mono">{{ model_name }}</span></p>
-            <p><span class="muted">Target:</span> <span class="mono">log1p(Revenue)</span></p>
-            <p><span class="muted">Success threshold:</span> <span class="mono">${{ threshold_fmt }}</span></p>
-
-            {% if rmse_usd is not none %}
-              <p><span class="muted">RMSE:</span> <span class="mono">${{ "{:,.0f}".format(rmse_usd) }}</span></p>
-            {% else %}
-              <p class="muted fine">RMSE: (add your notebook RMSE here)</p>
-            {% endif %}
-
-            {% if r2_score is not none %}
-              <p><span class="muted">R²:</span> <span class="mono">{{ "%.2f"|format(r2_score) }}</span></p>
-            {% else %}
-              <p class="muted fine">R²: (add your notebook R² here)</p>
-            {% endif %}
-
-            <p><span class="muted">Estimated log-RMSE used for probability:</span>
-              <span class="mono">{{ "%.3f"|format(log_rmse) }}</span>
-            </p>
-          </div>
-        </details>
-      </section>
-
-      {% if engineered %}
-        <section class="card">
-          <div class="table-head">
-            <h2 class="card-title">Summary</h2>
-          </div>
-
-          <div class="table-wrap">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Feature</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for k, v in engineered.items() %}
-                  <tr>
-                    <td class="mono">{{ k }}</td>
-                    <td class="mono">{{ v }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      {% endif %}
     </main>
-
-    <footer class="footer"></footer>
   </div>
 </body>
 </html>
