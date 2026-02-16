@@ -2,16 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <see name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prediction Results</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
   <div class="wrap">
+
+    <div class="appbar">
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="brand-title">
+          <div class="title">Movie Success Predictor</div>
+          <div class="subtitle">Prediction Results</div>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <a class="btn ghost" href="{{ url_for('index') }}">New Prediction</a>
+      </div>
+    </div>
+
     <header class="header">
       <div>
         <h1>Prediction Results</h1>
-        <p class="sub">Threshold: ${{ threshold_fmt }}</p>
+        <p class="sub">
+          Your prediction summary
+          <span class="hint">Threshold: ${{ threshold_fmt }}</span>
+        </p>
       </div>
     </header>
 
@@ -22,32 +39,28 @@
           <p>{{ error }}</p>
 
           <div class="actions" style="margin-top: 14px;">
-            <button class="btn" onclick="window.location='/'">Back</button>
+            <a class="btn" href="{{ url_for('index') }}">Back</a>
           </div>
         </section>
       {% endif %}
 
       {% if result %}
-        <section class="card result">
+        <section class="card">
           <div class="result-top">
             <div>
               <h2 class="card-title">Prediction</h2>
-              <p class="muted">This is based on the movie details you entered.</p>
+              <p class="muted">Based on the movie details you entered.</p>
             </div>
           </div>
 
           <div class="sf-toggle">
-            <div class="sf-half {% if result.is_success %}active success{% endif %}">
-              Success
-            </div>
-            <div class="sf-half {% if not result.is_success %}active flop{% endif %}">
-              Flop
-            </div>
+            <div class="sf-half {% if result.is_success %}active success{% endif %}">Success</div>
+            <div class="sf-half {% if not result.is_success %}active flop{% endif %}">Flop</div>
           </div>
 
           <div class="gauge">
             <div class="gauge-label">
-              <span class="muted">Success Probability</span>
+              <span>Success Probability</span>
               <span class="mono">{{ result.prob_fmt }}%</span>
             </div>
             <div class="gauge-track">
@@ -62,16 +75,16 @@
             </div>
             <div class="stat">
               <div class="stat-label">Revenue Prediction</div>
-              <div class="stat-value mono">$ {{ result.revenue_fmt }}</div>
+              <div class="stat-value mono">${{ result.revenue_fmt }}</div>
             </div>
           </div>
 
           <div class="actions" style="margin-top: 14px;">
-            <button class="btn ghost" onclick="window.location='/'">Back</button>
-            <a class="btn" href="{{ url_for('analytics') }}">View Analytics</a>
+            <a class="btn ghost" href="{{ url_for('index') }}">Back</a>
+            <a class="btn primary" href="{{ url_for('analytics') }}">View Analytics</a>
           </div>
 
-          <p class="fine muted" style="margin-top: 12px;">
+          <p class="fine">
             Probability is estimated from model error (log-RMSE) and the success threshold.
           </p>
         </section>

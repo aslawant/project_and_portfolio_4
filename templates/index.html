@@ -8,12 +8,25 @@
 </head>
 <body>
   <div class="wrap">
+
+    <div class="appbar">
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="brand-title">
+          <div class="title">Movie Success Predictor</div>
+          <div class="subtitle">Enter details → Get prediction</div>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <span class="hint">Threshold: ${{ threshold_fmt }}</span>
+      </div>
+    </div>
+
     <header class="header">
       <div>
-        <h1>Movie Success Predictor</h1>
+        <h1>Predict Movie Success</h1>
         <p class="sub">
-          Enter movie details to predict success.
-          <span class="hint">Threshold: ${{ threshold_fmt }}</span>
+          Enter a few movie attributes and the model will estimate revenue + the likelihood of success.
         </p>
       </div>
     </header>
@@ -70,7 +83,7 @@
           </div>
 
           <div class="actions">
-            <button type="submit" class="btn">Predict</button>
+            <button type="submit" class="btn primary">Predict</button>
             <button type="button" class="btn ghost" onclick="window.location='/'">Reset</button>
           </div>
         </form>

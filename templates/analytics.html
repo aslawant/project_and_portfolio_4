@@ -8,17 +8,33 @@
 </head>
 <body>
   <div class="wrap">
+
+    <div class="appbar">
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="brand-title">
+          <div class="title">Movie Success Predictor</div>
+          <div class="subtitle">Analytics Dashboard</div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <a class="btn ghost" href="{{ url_for('results') }}">Back to Results</a>
+        <a class="btn primary" href="{{ url_for('index') }}">New Prediction</a>
+      </div>
+    </div>
+
     <header class="header">
       <div>
         <h1>Analytics Dashboard</h1>
         <p class="sub">
-          Breakdown for your prediction • Threshold: ${{ threshold_fmt }}
+          Breakdown for your prediction
+          <span class="hint">Threshold: ${{ threshold_fmt }}</span>
         </p>
       </div>
     </header>
 
     <main class="main">
-
       <section class="dash-grid">
 
         <div class="card dash-card">
@@ -41,7 +57,7 @@
             {% endfor %}
           </div>
 
-          <div class="muted fine">
+          <div class="fine">
             Projected Revenue: <span class="mono">${{ result.revenue_fmt }}</span>
           </div>
         </div>
@@ -56,11 +72,15 @@
 
           {% if feature_importances %}
             <div class="bars">
-              {% for item in feature_importances[:5] %}
+              {% for item in feature_importances[:6] %}
+                {# cycle colors: c1..c5 #}
+                {% set mod = loop.index0 % 5 %}
+                {% set c = 'var(--c1)' if mod == 0 else ('var(--c2)' if mod == 1 else ('var(--c3)' if mod == 2 else ('var(--c4)' if mod == 3 else 'var(--c5)'))) %}
+
                 <div class="bar-row">
                   <div class="bar-label mono">{{ item.name }}</div>
                   <div class="bar-track">
-                    <div class="bar-fill" style="width: {{ item.pct }}%"></div>
+                    <div class="bar-fill" style="width: {{ item.pct }}%; --c: {{ c }};"></div>
                   </div>
                   <div class="bar-pct mono">{{ "%.0f"|format(item.pct) }}%</div>
                 </div>
@@ -108,7 +128,7 @@
 
           <div class="gauge" style="margin-top: 14px;">
             <div class="gauge-label">
-              <span class="muted">Success Probability</span>
+              <span>Success Probability</span>
               <span class="mono">{{ result.prob_fmt }}%</span>
             </div>
             <div class="gauge-track">
@@ -185,9 +205,8 @@
 
       <div class="actions" style="margin-top: 14px;">
         <a class="btn ghost" href="{{ url_for('results') }}">Back to Results</a>
-        <a class="btn" href="{{ url_for('index') }}">New Prediction</a>
+        <a class="btn primary" href="{{ url_for('index') }}">New Prediction</a>
       </div>
-
     </main>
   </div>
 </body>
