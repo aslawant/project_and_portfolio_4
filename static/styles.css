@@ -15,11 +15,33 @@
   --brand: #7c5cff;
   --brand2: #22c55e;
 
-  --c1: #3b82f6;  
-  --c2: #22c55e;  
-  --c3: #f59e0b;  
-  --c4: #a855f7;  
-  --c5: #ef4444;  
+  --c1: #3b82f6;
+  --c2: #22c55e;
+  --c3: #f59e0b;
+  --c4: #a855f7;
+  --c5: #ef4444;
+
+  color-scheme: dark;
+}
+
+html[data-theme="light"]{
+  --bg0: #f6f7fb;
+  --bg1: #eef1f8;
+  --card: rgba(0,0,0,0.04);
+  --card2: rgba(0,0,0,0.06);
+
+  --text: rgba(10,16,32,0.92);
+  --muted: rgba(10,16,32,0.68);
+  --muted2: rgba(10,16,32,0.52);
+
+  --border: rgba(10,16,32,0.10);
+  --border2: rgba(10,16,32,0.16);
+  --shadow: 0 16px 50px rgba(0,0,0,0.12);
+
+  --brand: #6d4bff;
+  --brand2: #16a34a;
+
+  color-scheme: light;
 }
 
 *{ box-sizing: border-box; }
@@ -28,8 +50,8 @@ html, body{ height: 100%; }
 body{
   margin: 0;
   background:
-    radial-gradient(900px 450px at 15% 0%, rgba(124,92,255,0.22), transparent 60%),
-    radial-gradient(800px 400px at 90% 10%, rgba(34,197,94,0.18), transparent 55%),
+    radial-gradient(900px 450px at 15% 0%, color-mix(in srgb, var(--brand) 22%, transparent), transparent 60%),
+    radial-gradient(800px 400px at 90% 10%, color-mix(in srgb, var(--brand2) 18%, transparent), transparent 55%),
     radial-gradient(900px 500px at 60% 110%, rgba(59,130,246,0.12), transparent 60%),
     linear-gradient(180deg, var(--bg0), var(--bg1));
   color: var(--text);
@@ -52,7 +74,7 @@ a{ color: inherit; }
   padding: 14px 16px;
   border: 1px solid var(--border);
   border-radius: 18px;
-  background: rgba(255,255,255,0.06);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
   box-shadow: var(--shadow);
   backdrop-filter: blur(10px);
 }
@@ -119,8 +141,8 @@ a{ color: inherit; }
   padding: 6px 10px;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.78);
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  color: color-mix(in srgb, var(--text) 82%, transparent);
   font-size: 12px;
 }
 
@@ -131,7 +153,7 @@ a{ color: inherit; }
 }
 
 .card{
-  background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.04));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card2) 95%, transparent), color-mix(in srgb, var(--card) 88%, transparent));
   border: 1px solid var(--border);
   border-radius: 18px;
   box-shadow: var(--shadow);
@@ -140,14 +162,14 @@ a{ color: inherit; }
 }
 
 .card:hover{
-  border-color: rgba(255,255,255,0.16);
+  border-color: color-mix(in srgb, var(--border2) 95%, transparent);
 }
 
 .card-title{
   margin: 0 0 12px;
   font-size: 16px;
   letter-spacing: 0.2px;
-  color: rgba(255,255,255,0.92);
+  color: var(--text);
 }
 
 .muted{ color: var(--muted); margin: 0; }
@@ -167,7 +189,7 @@ a{ color: inherit; }
   display:block;
   margin-bottom: 8px;
   font-weight: 750;
-  color: rgba(255,255,255,0.86);
+  color: color-mix(in srgb, var(--text) 92%, transparent);
   font-size: 13px;
 }
 
@@ -175,17 +197,17 @@ a{ color: inherit; }
   width: 100%;
   padding: 12px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(0,0,0,0.35);
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  background: color-mix(in srgb, var(--bg1) 70%, transparent);
   color: var(--text);
   outline: none;
 }
 
-.field input::placeholder{ color: rgba(255,255,255,0.35); }
+.field input::placeholder{ color: color-mix(in srgb, var(--text) 38%, transparent); }
 
 .field input:focus, .field select:focus{
-  border-color: rgba(124,92,255,0.55);
-  box-shadow: 0 0 0 4px rgba(124,92,255,0.18);
+  border-color: color-mix(in srgb, var(--brand) 55%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 18%, transparent);
 }
 
 .actions{
@@ -198,8 +220,8 @@ a{ color: inherit; }
 .btn{
   padding: 12px 16px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.10);
+  border: 1px solid color-mix(in srgb, var(--text) 16%, transparent);
+  background: color-mix(in srgb, var(--card2) 85%, transparent);
   color: var(--text);
   cursor: pointer;
   font-weight: 850;
@@ -211,8 +233,8 @@ a{ color: inherit; }
 }
 
 .btn:hover{
-  background: rgba(255,255,255,0.14);
-  border-color: rgba(255,255,255,0.22);
+  background: color-mix(in srgb, var(--card2) 95%, transparent);
+  border-color: color-mix(in srgb, var(--text) 22%, transparent);
 }
 
 .btn:active{
@@ -220,16 +242,21 @@ a{ color: inherit; }
 }
 
 .btn.primary{
-  border-color: rgba(124,92,255,0.42);
-  background: linear-gradient(135deg, rgba(124,92,255,0.38), rgba(34,197,94,0.22));
+  border-color: color-mix(in srgb, var(--brand) 42%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 38%, transparent), color-mix(in srgb, var(--brand2) 22%, transparent));
 }
 
 .btn.primary:hover{
-  background: linear-gradient(135deg, rgba(124,92,255,0.48), rgba(34,197,94,0.28));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 48%, transparent), color-mix(in srgb, var(--brand2) 28%, transparent));
 }
 
 .btn.ghost{
   background: transparent;
+}
+
+.theme-toggle{
+  gap: 8px;
+  padding: 10px 14px;
 }
 
 .result-top{
@@ -242,8 +269,8 @@ a{ color: inherit; }
 .stat{
   padding: 14px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card) 70%, transparent);
 }
 
 .stat-label{
@@ -272,10 +299,10 @@ a{ color: inherit; }
 .sf-toggle{
   margin-top: 12px;
   display: flex;
-  border: 1px solid rgba(255,255,255,0.14);
+  border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
-  background: rgba(255,255,255,0.05);
+  background: color-mix(in srgb, var(--card) 75%, transparent);
 }
 
 .sf-half{
@@ -284,16 +311,16 @@ a{ color: inherit; }
   padding: 12px 10px;
   font-weight: 950;
   letter-spacing: 0.2px;
-  color: rgba(255,255,255,0.70);
+  color: color-mix(in srgb, var(--text) 70%, transparent);
 }
 
 .sf-half.active{
-  color: rgba(255,255,255,0.96);
+  color: var(--text);
 }
 
 .sf-half.active.success{
   background: linear-gradient(135deg, rgba(34,197,94,0.28), rgba(34,197,94,0.12));
-  border-right: 1px solid rgba(255,255,255,0.10);
+  border-right: 1px solid var(--border);
 }
 
 .sf-half.active.flop{
@@ -304,8 +331,8 @@ a{ color: inherit; }
   margin-top: 12px;
   padding: 12px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card) 55%, transparent);
 }
 
 .gauge-label{
@@ -320,8 +347,8 @@ a{ color: inherit; }
 .gauge-track{
   height: 14px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: color-mix(in srgb, var(--card2) 75%, transparent);
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -334,7 +361,7 @@ a{ color: inherit; }
 .table-wrap{
   overflow: auto;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid var(--border);
 }
 
 .table{
@@ -346,19 +373,19 @@ a{ color: inherit; }
 .table thead th{
   text-align: left;
   font-size: 12px;
-  color: rgba(255,255,255,0.70);
-  background: rgba(255,255,255,0.06);
+  color: color-mix(in srgb, var(--text) 70%, transparent);
+  background: color-mix(in srgb, var(--card2) 85%, transparent);
   padding: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.10);
+  border-bottom: 1px solid var(--border);
 }
 
 .table tbody td{
   padding: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
 
 .table tbody tr:hover{
-  background: rgba(255,255,255,0.04);
+  background: color-mix(in srgb, var(--card2) 55%, transparent);
 }
 
 .bars{
@@ -374,7 +401,7 @@ a{ color: inherit; }
 }
 
 .bar-label{
-  color: rgba(255,255,255,0.86);
+  color: color-mix(in srgb, var(--text) 86%, transparent);
   font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -384,22 +411,22 @@ a{ color: inherit; }
 .bar-track{
   height: 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: color-mix(in srgb, var(--card2) 80%, transparent);
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
 .bar-fill{
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--c, var(--c1)) 90%, white 10%), rgba(255,255,255,0.10));
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c, var(--c1)) 90%, white 10%), color-mix(in srgb, var(--card) 30%, transparent));
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 
 .bar-pct{
   text-align: right;
   font-size: 12px;
-  color: rgba(255,255,255,0.78);
+  color: color-mix(in srgb, var(--text) 78%, transparent);
 }
 
 .dash-grid{
@@ -426,29 +453,29 @@ a{ color: inherit; }
 .pill{
   padding: 8px 10px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card) 70%, transparent);
   font-size: 12px;
-  color: rgba(255,255,255,0.70);
+  color: color-mix(in srgb, var(--text) 70%, transparent);
   user-select: none;
 }
 
 .pill.active{
-  background: rgba(124,92,255,0.20);
-  border-color: rgba(124,92,255,0.30);
-  color: rgba(255,255,255,0.95);
+  background: color-mix(in srgb, var(--brand) 20%, transparent);
+  border-color: color-mix(in srgb, var(--brand) 30%, transparent);
+  color: var(--text);
 }
 
 .mini-chart{
   height: 160px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid var(--border);
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)),
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 35%, transparent), color-mix(in srgb, var(--card) 20%, transparent)),
     repeating-linear-gradient(
       to right,
-      rgba(255,255,255,0.06) 0px,
-      rgba(255,255,255,0.06) 1px,
+      color-mix(in srgb, var(--border) 50%, transparent) 0px,
+      color-mix(in srgb, var(--border) 50%, transparent) 1px,
       transparent 1px,
       transparent 32px
     );
@@ -464,7 +491,7 @@ a{ color: inherit; }
   flex: 1;
   border-radius: 12px;
   background: linear-gradient(180deg, rgba(59,130,246,0.95), rgba(34,197,94,0.55));
-  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   opacity: 0.95;
 }
 
@@ -481,15 +508,15 @@ a{ color: inherit; }
 }
 
 .impact-x, .impact-y{
-  color: rgba(255,255,255,0.78);
+  color: color-mix(in srgb, var(--text) 78%, transparent);
   font-size: 12px;
 }
 
 .impact-track{
   height: 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: color-mix(in srgb, var(--card2) 75%, transparent);
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -512,15 +539,15 @@ a{ color: inherit; }
 }
 
 .genre-name{
-  color: rgba(255,255,255,0.86);
+  color: color-mix(in srgb, var(--text) 86%, transparent);
   font-size: 13px;
 }
 
 .genre-track{
   height: 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: color-mix(in srgb, var(--card2) 75%, transparent);
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -532,7 +559,7 @@ a{ color: inherit; }
 
 .genre-pct{
   text-align: right;
-  color: rgba(255,255,255,0.78);
+  color: color-mix(in srgb, var(--text) 78%, transparent);
   font-size: 12px;
 }
 

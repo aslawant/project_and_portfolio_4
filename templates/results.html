@@ -18,6 +18,9 @@
         </div>
       </div>
       <div class="nav-actions">
+        <button class="btn ghost theme-toggle" type="button" id="themeToggle" aria-label="Toggle theme">
+          🌙 <span class="theme-text">Dark</span>
+        </button>
         <a class="btn ghost" href="{{ url_for('index') }}">New Prediction</a>
       </div>
     </div>
@@ -91,5 +94,35 @@
       {% endif %}
     </main>
   </div>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const saved = localStorage.getItem("theme");
+      const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+      const initial = saved || (prefersLight ? "light" : "dark");
+      root.dataset.theme = initial;
+
+      function updateLabel() {
+        const btn = document.getElementById("themeToggle");
+        if (!btn) return;
+        const isLight = root.dataset.theme === "light";
+        btn.querySelector(".theme-text").textContent = isLight ? "Light" : "Dark";
+        btn.firstChild.textContent = isLight ? "☀️ " : "🌙 ";
+      }
+
+      updateLabel();
+
+      const toggle = document.getElementById("themeToggle");
+      if (toggle) {
+        toggle.addEventListener("click", () => {
+          const next = root.dataset.theme === "light" ? "dark" : "light";
+          root.dataset.theme = next;
+          localStorage.setItem("theme", next);
+          updateLabel();
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
