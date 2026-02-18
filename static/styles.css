@@ -1,3 +1,5 @@
+/* static/styles.css */
+
 :root{
   --bg0: #07090f;
   --bg1: #0b1020;
@@ -574,4 +576,83 @@ a{ color: inherit; }
   .bar-row{ grid-template-columns: 1fr; }
   .bar-pct{ text-align: left; }
   .brand{ min-width: auto; }
+}
+
+/* Helper text under inputs */
+.help{
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--muted2);
+}
+
+/* Tooltip */
+.has-tooltip{
+  position: relative;
+  cursor: help;
+  outline: none;
+}
+
+.has-tooltip::after{
+  content: attr(data-tooltip);
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: min(360px, 80vw);
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg1) 92%, transparent);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 50;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.has-tooltip:hover::after,
+.has-tooltip:focus::after{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 760px){
+  .has-tooltip::after{
+    left: 0;
+    right: auto;
+  }
+}
+
+/* Loading spinner on Predict button */
+.btn .spinner{
+  display: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--text) 35%, transparent);
+  border-top-color: color-mix(in srgb, var(--text) 90%, transparent);
+  margin-left: 10px;
+  animation: spin 0.8s linear infinite;
+}
+
+.btn.loading .spinner{
+  display: inline-block;
+}
+
+.btn.loading{
+  opacity: 0.9;
+  cursor: progress;
+}
+
+.btn:disabled{
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+@keyframes spin{
+  to { transform: rotate(360deg); }
 }

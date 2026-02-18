@@ -39,6 +39,17 @@ DEFAULT_VALUES = {
     "Genres": "Action",
 }
 
+FIELD_HELP = {
+    "Budget": "Total production budget in USD (must be 0 or greater).",
+    "Runtime": "Length of the movie in minutes.",
+    "Popularity": "TMDB popularity score (higher = more popular).",
+    "Vote_Average": "Average rating out of 10.",
+    "Vote_Count": "Total number of ratings (must be 0 or greater).",
+    "Release_Year": "4-digit release year (ex: 2020).",
+    "Release_Month": "Month number from 1 to 12.",
+    "Genres": "Select the primary genre for the movie.",
+}
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
 
@@ -265,13 +276,13 @@ def build_feature_row(values: dict) -> pd.DataFrame:
     genre = str(values["Genres"]).strip()
 
     if rel_month < 1 or rel_month > 12:
-        raise ValueError("Release_Month must be between 1 and 12.")
+        raise ValueError("Release Month must be between 1 and 12.")
     if budget < 0 or runtime < 0 or popularity < 0 or vote_cnt < 0:
-        raise ValueError("Budget, Runtime, Popularity, and Vote_Count must be non-negative.")
+        raise ValueError("Budget, Runtime, Popularity, and Vote Count must be 0 or greater.")
     if vote_avg < 0 or vote_avg > 10:
-        raise ValueError("Vote_Average must be between 0 and 10.")
+        raise ValueError("Vote Average must be between 0 and 10.")
     if not genre:
-        raise ValueError("Genres is required.")
+        raise ValueError("Genre is required.")
 
     rel_quarter = month_to_quarter(rel_month)
 
@@ -304,6 +315,11 @@ def df_row_to_display_dict(df_row: pd.DataFrame) -> dict:
 
 
 def common_context(values, result, error, engineered):
+    threshold_tooltip = (
+        "Success Revenue Threshold = the minimum predicted revenue needed to label a movie as “Success”. "
+        "This value is calculated from the dataset (median revenue)."
+    )
+
     return dict(
         genres=GENRE_LIST,
         values=values,
@@ -311,6 +327,8 @@ def common_context(values, result, error, engineered):
         error=error,
         engineered=engineered,
         threshold_fmt=THRESHOLD_FMT,
+        threshold_tooltip=threshold_tooltip,
+        field_help=FIELD_HELP,
         log_rmse=LOG_RMSE,
         model_name=MODEL_NAME,
         dataset_name=DATASET_NAME,
@@ -321,13 +339,14 @@ def common_context(values, result, error, engineered):
 
 
 @app.route("/", methods=["GET"])
-
 def index():
+    values = session.get("values", DEFAULT_VALUES)
+    error = session.pop("error", None)
+
     session.pop("result", None)
     session.pop("engineered", None)
-    session.pop("values", None)
-    session.pop("error", None)
-    return render_template("index.html", **common_context(DEFAULT_VALUES, None, None, None))
+
+    return render_template("index.html", **common_context(values, None, error, None))
 
 
 @app.route("/predict", methods=["POST"])
@@ -367,31 +386,29 @@ def predict():
 
     except Exception as e:
         session["values"] = values
-        session["result"] = None
-        session["engineered"] = None
         session["error"] = str(e)
-        return redirect(url_for("results"))
+        return redirect(url_for("index"))
 
 
 @app.route("/results", methods=["GET"])
 def results():
-    values = session.get("values", DEFAULT_VALUES)
     result = session.get("result", None)
-    error = session.get("error", None)
+    if result is None:
+        return redirect(url_for("index"))
+
+    values = session.get("values", DEFAULT_VALUES)
     engineered = session.get("engineered", None)
 
-    return render_template("results.html", **common_context(values, result, error, engineered))
+    return render_template("results.html", **common_context(values, result, None, engineered))
 
 
 @app.route("/analytics", methods=["GET"])
 def analytics():
-    
     if session.get("result") is None:
         return redirect(url_for("index"))
 
     values = session.get("values", DEFAULT_VALUES)
     result = session.get("result", None)
-    error = session.get("error", None)
     engineered = session.get("engineered", None)
 
     pred_revenue = float(str(result["revenue_fmt"]).replace(",", "")) if result else 0.0
@@ -400,8 +417,7 @@ def analytics():
     forecast = [pred_revenue * (m / 12.0) for m in months]
 
     budgets = [100_000_000, 200_000_000, 300_000_000, 400_000_000, 500_000_000]
-    
-    impact_revenue = [b * 2.0 for b in budgets]  
+    impact_revenue = [b * 2.0 for b in budgets] 
 
     top_genres = ["Action", "Adventure", "Comedy", "Drama", "Thriller"]
     base_p = float(result["prob"]) if result else 0.5
@@ -410,7 +426,7 @@ def analytics():
 
     dashboard = {
         "months": months,
-        "forecast": [round(v / 1_000_000, 1) for v in forecast],  # in $M
+        "forecast": [round(v / 1_000_000, 1) for v in forecast],
         "budgets_m": [int(b / 1_000_000) for b in budgets],
         "impact_revenue_m": [round(v / 1_000_000, 0) for v in impact_revenue],
         "top_genres": top_genres,
@@ -418,7 +434,7 @@ def analytics():
         "genre_revs_m": [round(v / 1_000_000, 0) for v in genre_revs],
     }
 
-    ctx = common_context(values, result, error, engineered)
+    ctx = common_context(values, result, None, engineered)
     ctx["dashboard"] = dashboard
 
     return render_template("analytics.html", **ctx)

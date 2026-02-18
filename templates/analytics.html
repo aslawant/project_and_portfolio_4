@@ -32,7 +32,9 @@
         <h1>Analytics Dashboard</h1>
         <p class="sub">
           Breakdown for your prediction
-          <span class="hint">Threshold: ${{ threshold_fmt }}</span>
+          <span class="hint has-tooltip" tabindex="0" data-tooltip="{{ threshold_tooltip }}">
+            Success Revenue Threshold: ${{ threshold_fmt }}
+          </span>
         </p>
       </div>
     </header>
@@ -44,7 +46,7 @@
           <div class="dash-head">
             <div>
               <h2 class="card-title">Revenue Forecast</h2>
-              <p class="muted">12-month projection (demo)</p>
+              <p class="muted">12-month projection</p>
             </div>
             <div class="pill-row">
               <span class="pill active">1Y</span>
@@ -97,7 +99,7 @@
           <div class="dash-head">
             <div>
               <h2 class="card-title">Budget Impact</h2>
-              <p class="muted">What-if curve (demo)</p>
+              <p class="muted">What-if curve</p>
             </div>
             <span class="pill active">Overall</span>
           </div>
@@ -154,7 +156,7 @@
           <div class="dash-head">
             <div>
               <h2 class="card-title">Genre Performance</h2>
-              <p class="muted">Estimated performance by genre (demo)</p>
+              <p class="muted">Estimated performance by genre</p>
             </div>
             <span class="pill active">Overall</span>
           </div>
@@ -176,7 +178,7 @@
           <div class="dash-head">
             <div>
               <h2 class="card-title">Genre Performance</h2>
-              <p class="muted">Success probability + revenue (demo)</p>
+              <p class="muted">Success probability + revenue</p>
             </div>
             <span class="pill active">Overall</span>
           </div>

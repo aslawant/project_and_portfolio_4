@@ -30,23 +30,14 @@
         <h1>Prediction Results</h1>
         <p class="sub">
           Your prediction summary
-          <span class="hint">Threshold: ${{ threshold_fmt }}</span>
+          <span class="hint has-tooltip" tabindex="0" data-tooltip="{{ threshold_tooltip }}">
+            Success Revenue Threshold: ${{ threshold_fmt }}
+          </span>
         </p>
       </div>
     </header>
 
     <main class="main">
-      {% if error %}
-        <section class="card error">
-          <h2 class="card-title">Error</h2>
-          <p>{{ error }}</p>
-
-          <div class="actions" style="margin-top: 14px;">
-            <a class="btn" href="{{ url_for('index') }}">Back</a>
-          </div>
-        </section>
-      {% endif %}
-
       {% if result %}
         <section class="card">
           <div class="result-top">
@@ -88,7 +79,8 @@
           </div>
 
           <p class="fine">
-            Probability is estimated from model error (log-RMSE) and the success threshold.
+            Success vs Flop is decided by comparing predicted revenue to the Success Revenue Threshold.
+            Probability is estimated from model error (log-RMSE) and the threshold.
           </p>
         </section>
       {% endif %}
