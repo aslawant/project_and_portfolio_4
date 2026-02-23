@@ -68,7 +68,7 @@
               <div class="stat-value mono">{{ result.prob_fmt }}%</div>
             </div>
             <div class="stat">
-              <div class="stat-label">Revenue Prediction</div>
+              <div class="stat-label">Box Office Prediction</div>
               <div class="stat-value mono">${{ result.revenue_fmt }}</div>
             </div>
           </div>
@@ -79,8 +79,6 @@
           </div>
 
           <p class="fine">
-            Success vs Flop is decided by comparing predicted revenue to the Success Revenue Threshold.
-            Probability is estimated from model error (log-RMSE) and the threshold.
           </p>
         </section>
       {% endif %}

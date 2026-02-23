@@ -193,7 +193,8 @@ a{ color: inherit; }
   font-size: 13px;
 }
 
-.field input, .field select{
+.field input,
+.field select{
   width: 100%;
   padding: 12px 12px;
   border-radius: 14px;
@@ -203,11 +204,56 @@ a{ color: inherit; }
   outline: none;
 }
 
-.field input::placeholder{ color: color-mix(in srgb, var(--text) 38%, transparent); }
+.field input::placeholder{
+  color: color-mix(in srgb, var(--text) 38%, transparent);
+}
 
-.field input:focus, .field select:focus{
+.field input:focus,
+.field select:focus{
   border-color: color-mix(in srgb, var(--brand) 55%, transparent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+
+.combo{
+  display:flex;
+  align-items:stretch;
+  width:100%;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.combo-input{
+  flex: 1 1 auto;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  background: color-mix(in srgb, var(--bg1) 70%, transparent);
+  color: var(--text);
+  padding: 12px 12px;
+  border-radius: 14px;
+  outline: none;
+  min-width: 0;
+}
+
+.combo-select{
+  flex: 0 0 160px;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  background: color-mix(in srgb, var(--bg1) 70%, transparent);
+  color: var(--text);
+  padding: 12px 12px;
+  border-radius: 14px;
+  outline: none;
+  cursor: pointer;
+}
+
+.combo-input:focus,
+.combo-select:focus{
+  border-color: color-mix(in srgb, var(--brand) 55%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+
+@media (max-width: 760px){
+  .combo-select{ flex-basis: 150px; }
 }
 
 .actions{
@@ -237,9 +283,7 @@ a{ color: inherit; }
   border-color: color-mix(in srgb, var(--text) 22%, transparent);
 }
 
-.btn:active{
-  transform: translateY(1px);
-}
+.btn:active{ transform: translateY(1px); }
 
 .btn.primary{
   border-color: color-mix(in srgb, var(--brand) 42%, transparent);
@@ -250,9 +294,7 @@ a{ color: inherit; }
   background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 48%, transparent), color-mix(in srgb, var(--brand2) 28%, transparent));
 }
 
-.btn.ghost{
-  background: transparent;
-}
+.btn.ghost{ background: transparent; }
 
 .theme-toggle{
   gap: 8px;

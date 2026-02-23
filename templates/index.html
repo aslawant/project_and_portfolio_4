@@ -63,21 +63,71 @@
             </div>
 
             <div class="field">
-              <label>Popularity</label>
-              <input name="Popularity" type="number" step="0.000001" min="0" value="{{ values.get('Popularity', 25.0) }}" required />
-              <div class="help">{{ field_help["Popularity"] }}</div>
+              <label for="Popularity">Popularity</label>
+
+              <div class="combo">
+                <input
+                  name="Popularity"
+                  id="Popularity"
+                  class="combo-input"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value="{{ values.get('Popularity', 25.0) }}"
+                  placeholder="25"
+                  required
+                />
+
+                <select id="popPreset" class="combo-select" aria-label="Popularity preset">
+                  <option value="">Preset</option>
+                  <option value="25">Average</option>
+                  <option value="60">Trending</option>
+                  <option value="100">Blockbuster</option>
+                </select>
+              </div>
+
+              <div class="help">TMDB popularity score (higher = more popular).</div>
             </div>
 
             <div class="field">
-              <label>Vote Average</label>
-              <input name="Vote_Average" type="number" step="0.01" min="0" max="10" value="{{ values.get('Vote_Average', 7.2) }}" required />
-              <div class="help">{{ field_help["Vote_Average"] }}</div>
+              <label for="Vote_Average">Average Rating (0–10)</label>
+
+              <div class="combo">
+                <input
+                  name="Vote_Average"
+                  id="Vote_Average"
+                  class="combo-input"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="10"
+                  value="{{ values.get('Vote_Average', 7.2) }}"
+                  placeholder="7.2"
+                  required
+                />
+
+                <select id="ratingPreset" class="combo-select" aria-label="Rating preset">
+                  <option value="">Preset</option>
+                  <option value="7.0">Average</option>
+                  <option value="7.5">Strong</option>
+                  <option value="8.5">Excellent</option>
+                </select>
+              </div>
+
+              <div class="help">Average rating out of 10.</div>
             </div>
 
             <div class="field">
-              <label>Vote Count</label>
-              <input name="Vote_Count" type="number" step="1" min="0" value="{{ values.get('Vote_Count', 3000) }}" required />
-              <div class="help">{{ field_help["Vote_Count"] }}</div>
+              <label>Number of Ratings</label>
+              <input
+                name="Vote_Count"
+                type="number"
+                step="1"
+                min="0"
+                value="{{ values.get('Vote_Count', 3000) }}"
+                required
+              />
+              <div class="help">How many people rated the movie.</div>
             </div>
 
             <div class="field">
@@ -111,8 +161,7 @@
             <button type="button" class="btn ghost" onclick="window.location='/'">Reset</button>
           </div>
 
-          <p class="fine">
-          </p>
+          <p class="fine"></p>
         </form>
       </section>
     </main>
@@ -143,6 +192,22 @@
           root.dataset.theme = next;
           localStorage.setItem("theme", next);
           updateLabel();
+        });
+      }
+
+      const popPreset = document.getElementById("popPreset");
+      const popInput = document.getElementById("Popularity");
+      if (popPreset && popInput) {
+        popPreset.addEventListener("change", () => {
+          if (popPreset.value !== "") popInput.value = popPreset.value;
+        });
+      }
+
+      const ratingPreset = document.getElementById("ratingPreset");
+      const ratingInput = document.getElementById("Vote_Average");
+      if (ratingPreset && ratingInput) {
+        ratingPreset.addEventListener("change", () => {
+          if (ratingPreset.value !== "") ratingInput.value = ratingPreset.value;
         });
       }
 
