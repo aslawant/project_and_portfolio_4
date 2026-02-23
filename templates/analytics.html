@@ -98,22 +98,55 @@
         <div class="card dash-card">
           <div class="dash-head">
             <div>
-              <h2 class="card-title">Budget Impact</h2>
-              <p class="muted">What-if curve</p>
+              <h2 class="card-title">Budget Simulator</h2>
+              <p class="muted">Adjust budget → see updated prediction</p>
             </div>
-            <span class="pill active">Overall</span>
+
           </div>
 
-          <div class="impact">
-            {% for i in range(dashboard.budgets_m|length) %}
-              <div class="impact-row">
-                <div class="mono impact-x">${{ dashboard.budgets_m[i] }}M</div>
-                <div class="impact-track">
-                  <div class="impact-fill" style="width: {{ (dashboard.impact_revenue_m[i] / (dashboard.impact_revenue_m[-1] if dashboard.impact_revenue_m[-1] else 1)) * 100 }}%"></div>
-                </div>
-                <div class="mono impact-y">${{ dashboard.impact_revenue_m[i] }}M</div>
+          <div class="sim">
+            <div class="sim-top">
+              <div class="sim-kv">
+                <div class="sim-k">Selected Budget</div>
+                <div class="sim-v mono" id="simBudget">${{ dashboard.sim_budget_fmt }}</div>
               </div>
-            {% endfor %}
+
+              <div class="sim-badge {% if dashboard.sim_is_success %}success{% else %}flop{% endif %}" id="simBadge">
+                {{ "Success" if dashboard.sim_is_success else "Flop" }}
+              </div>
+            </div>
+
+            <div class="sim-slider">
+              <input
+                id="budgetSlider"
+                type="range"
+                min="{{ dashboard.sim_min }}"
+                max="{{ dashboard.sim_max }}"
+                step="{{ dashboard.sim_step }}"
+                value="{{ dashboard.sim_budget }}"
+                aria-label="Budget slider"
+              />
+              <div class="sim-range mono">
+                <span>${{ "{:,.0f}".format(dashboard.sim_min) }}</span>
+                <span>${{ "{:,.0f}".format(dashboard.sim_max) }}</span>
+              </div>
+            </div>
+
+            <div class="sim-metrics">
+              <div class="sim-card">
+                <div class="sim-k">Predicted Revenue</div>
+                <div class="sim-v mono" id="simRevenue">${{ dashboard.sim_revenue_fmt }}</div>
+              </div>
+
+              <div class="sim-card">
+                <div class="sim-k">Success Probability</div>
+                <div class="sim-v mono" id="simProb">{{ dashboard.sim_prob_fmt }}%</div>
+              </div>
+            </div>
+
+            <div class="sim-help fine" id="simHelp">
+              Slide the budget to see how the prediction changes. Other inputs stay the same.
+            </div>
           </div>
         </div>
 
@@ -239,6 +272,59 @@
           root.dataset.theme = next;
           localStorage.setItem("theme", next);
           updateLabel();
+        });
+      }
+
+      const slider = document.getElementById("budgetSlider");
+      const elBudget = document.getElementById("simBudget");
+      const elRevenue = document.getElementById("simRevenue");
+      const elProb = document.getElementById("simProb");
+      const elBadge = document.getElementById("simBadge");
+      const elHelp = document.getElementById("simHelp");
+
+      function formatMoney(n) {
+        try {
+          return Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
+        } catch {
+          return String(n);
+        }
+      }
+
+      let t = null;
+
+      async function runWhatIf(budget) {
+        elHelp.textContent = "Updating prediction…";
+
+        const res = await fetch("{{ url_for('what_if_budget') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ budget: budget })
+        });
+
+        const data = await res.json();
+        if (!data.ok) {
+          elHelp.textContent = data.error || "Could not update prediction.";
+          return;
+        }
+
+        elBudget.textContent = "$" + formatMoney(data.budget);
+        elRevenue.textContent = "$" + data.revenue_fmt;
+        elProb.textContent = data.prob_fmt + "%";
+
+        elBadge.textContent = data.is_success ? "Success" : "Flop";
+        elBadge.classList.toggle("success", !!data.is_success);
+        elBadge.classList.toggle("flop", !data.is_success);
+
+        elHelp.textContent = "Slide the budget to see how the prediction changes. Other inputs stay the same.";
+      }
+
+      if (slider) {
+        slider.addEventListener("input", () => {
+          const v = Number(slider.value || 0);
+          elBudget.textContent = "$" + formatMoney(v);
+
+          if (t) clearTimeout(t);
+          t = setTimeout(() => runWhatIf(v), 140);
         });
       }
     })();

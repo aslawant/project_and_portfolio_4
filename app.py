@@ -5,7 +5,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from math import erf, sqrt
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 
 MODEL_PATH = "best_model.joblib"
 DATA_PATH = "data/movie_data_cleaned.csv"
@@ -338,6 +338,30 @@ def common_context(values, result, error, engineered):
     )
 
 
+def _predict_from_values(values: dict) -> dict:
+    X_new = build_feature_row(values)
+
+    pred_log = float(model.predict(X_new)[0])
+    pred_revenue = float(np.expm1(pred_log))
+    pred_revenue = max(0.0, pred_revenue)
+
+    is_success = pred_revenue >= SUCCESS_THRESHOLD
+    verdict = "Success" if is_success else "Flop"
+
+    prob = success_probability(pred_log, LOG_RMSE, SUCCESS_THRESHOLD)
+    prob = max(0.0, min(1.0, prob))
+
+    return {
+        "pred_log": f"{pred_log:.4f}",
+        "revenue_raw": pred_revenue,
+        "revenue_fmt": format_money(pred_revenue),
+        "verdict": verdict,
+        "is_success": bool(is_success),
+        "prob": float(prob),
+        "prob_fmt": f"{prob * 100:.1f}",
+    }
+
+
 @app.route("/", methods=["GET"])
 def index():
     values = session.get("values", DEFAULT_VALUES)
@@ -354,31 +378,19 @@ def predict():
     values = {**DEFAULT_VALUES, **dict(request.form)}
 
     try:
+        out = _predict_from_values(values)
         X_new = build_feature_row(values)
-
-        pred_log = float(model.predict(X_new)[0])
-        pred_revenue = float(np.expm1(pred_log))
-        pred_revenue = max(0.0, pred_revenue)
-
-        is_success = pred_revenue >= SUCCESS_THRESHOLD
-        verdict = "Success" if is_success else "Flop"
-
-        prob = success_probability(pred_log, LOG_RMSE, SUCCESS_THRESHOLD)
-        prob = max(0.0, min(1.0, prob))
-
-        result = {
-            "pred_log": f"{pred_log:.4f}",
-            "revenue_fmt": format_money(pred_revenue),
-            "verdict": verdict,
-            "is_success": is_success,
-            "prob": prob,
-            "prob_fmt": f"{prob * 100:.1f}",
-        }
-
         engineered = df_row_to_display_dict(X_new)
 
         session["values"] = values
-        session["result"] = result
+        session["result"] = {
+            "pred_log": out["pred_log"],
+            "revenue_fmt": out["revenue_fmt"],
+            "verdict": out["verdict"],
+            "is_success": out["is_success"],
+            "prob": out["prob"],
+            "prob_fmt": out["prob_fmt"],
+        }
         session["engineered"] = engineered
         session["error"] = None
 
@@ -412,32 +424,72 @@ def analytics():
     engineered = session.get("engineered", None)
 
     pred_revenue = float(str(result["revenue_fmt"]).replace(",", "")) if result else 0.0
+    base_prob = float(result["prob"]) if result else 0.0
 
     months = list(range(1, 13))
     forecast = [pred_revenue * (m / 12.0) for m in months]
-
-    budgets = [100_000_000, 200_000_000, 300_000_000, 400_000_000, 500_000_000]
-    impact_revenue = [b * 2.0 for b in budgets] 
 
     top_genres = ["Action", "Adventure", "Comedy", "Drama", "Thriller"]
     base_p = float(result["prob"]) if result else 0.5
     genre_probs = [max(0.05, min(0.95, base_p + delta)) for delta in (0.08, 0.04, 0.00, -0.03, -0.07)]
     genre_revs = [pred_revenue * (p / base_p) if base_p > 0 else pred_revenue for p in genre_probs]
 
+    current_budget = float(values.get("Budget", DEFAULT_VALUES["Budget"]))
+    sim_min = 5_000_000
+    sim_max = 250_000_000
+    sim_step = 1_000_000
+
     dashboard = {
         "months": months,
         "forecast": [round(v / 1_000_000, 1) for v in forecast],
-        "budgets_m": [int(b / 1_000_000) for b in budgets],
-        "impact_revenue_m": [round(v / 1_000_000, 0) for v in impact_revenue],
+
         "top_genres": top_genres,
         "genre_probs": [round(p * 100, 0) for p in genre_probs],
         "genre_revs_m": [round(v / 1_000_000, 0) for v in genre_revs],
+
+        "sim_budget": int(current_budget),
+        "sim_budget_fmt": format_money(current_budget),
+        "sim_revenue_fmt": result["revenue_fmt"] if result else "0",
+        "sim_prob_fmt": f"{base_prob * 100:.1f}",
+        "sim_verdict": result["verdict"] if result else "—",
+        "sim_is_success": bool(result["is_success"]) if result else False,
+        "sim_min": int(sim_min),
+        "sim_max": int(sim_max),
+        "sim_step": int(sim_step),
     }
 
     ctx = common_context(values, result, None, engineered)
     ctx["dashboard"] = dashboard
 
     return render_template("analytics.html", **ctx)
+
+
+@app.route("/what-if/budget", methods=["POST"])
+def what_if_budget():
+    if session.get("result") is None:
+        return jsonify({"ok": False, "error": "No active prediction in session."}), 400
+
+    try:
+        payload = request.get_json(silent=True) or {}
+        budget = float(payload.get("budget", 0))
+
+        base_values = {**DEFAULT_VALUES, **(session.get("values", {}) or {})}
+        base_values["Budget"] = budget
+
+        out = _predict_from_values(base_values)
+
+        return jsonify({
+            "ok": True,
+            "budget": int(budget),
+            "budget_fmt": format_money(budget),
+            "revenue_fmt": out["revenue_fmt"],
+            "prob_fmt": out["prob_fmt"],
+            "verdict": out["verdict"],
+            "is_success": out["is_success"],
+        })
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
 
 
 if __name__ == "__main__":
