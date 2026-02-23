@@ -10,13 +10,14 @@
   <div class="wrap">
 
     <div class="appbar">
-      <div class="brand">
+      <a class="brand" href="{{ url_for('index') }}" aria-label="Home">
         <div class="logo"></div>
         <div class="brand-title">
           <div class="title">Movie Success Predictor</div>
           <div class="subtitle">Enter details → Get prediction</div>
         </div>
-      </div>
+      </a>
+
       <div class="nav-actions">
         <button class="btn ghost theme-toggle" type="button" id="themeToggle" aria-label="Toggle theme">
           🌙 <span class="theme-text">Dark</span>
@@ -90,7 +91,7 @@
             </div>
 
             <div class="field">
-              <label for="Vote_Average">Average Rating (0–10)</label>
+              <label for="Vote_Average">Average Rating</label>
 
               <div class="combo">
                 <input

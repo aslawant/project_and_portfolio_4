@@ -712,3 +712,5 @@ a{ color: inherit; }
 .btn:disabled{ opacity: 0.75; cursor: not-allowed; }
 
 @keyframes spin{ to { transform: rotate(360deg); } }
+
+.brand { text-decoration: none; color: inherit; }
