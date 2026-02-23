@@ -1,5 +1,3 @@
-/* static/styles.css */
-
 :root{
   --bg0: #07090f;
   --bg1: #0b1020;
@@ -578,7 +576,6 @@ a{ color: inherit; }
   .brand{ min-width: auto; }
 }
 
-/* Helper text under inputs */
 .help{
   margin-top: 6px;
   font-size: 12px;
@@ -586,7 +583,6 @@ a{ color: inherit; }
   color: var(--muted2);
 }
 
-/* Tooltip */
 .has-tooltip{
   position: relative;
   cursor: help;
@@ -627,7 +623,6 @@ a{ color: inherit; }
   }
 }
 
-/* Loading spinner on Predict button */
 .btn .spinner{
   display: none;
   width: 14px;
