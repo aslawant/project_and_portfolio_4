@@ -1,4 +1,5 @@
 ![App Screenshot](static/image/main_page.png)
+![App Screenshot](static/image/prediction_page.png)
 
 # 🎬 Movie Success Predictor
 
