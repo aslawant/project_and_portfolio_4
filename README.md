@@ -1,3 +1,5 @@
+![App Screenshot](static/image/main_page.png)
+
 # 🎬 Movie Success Predictor
 
 A machine learning–powered web application that predicts whether a movie will be a **Success or Flop**, along with projected revenue and probability metrics, based on key film attributes.
