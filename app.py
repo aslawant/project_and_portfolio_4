@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime
+
 import joblib
 import numpy as np
 import pandas as pd
@@ -361,6 +363,27 @@ def _predict_from_values(values: dict) -> dict:
         "prob_fmt": f"{prob * 100:.1f}",
     }
 
+def add_to_history(values: dict, result: dict) -> None:
+    """Store recent predictions in session (keeps last 10)."""
+    history = session.get("history", [])
+    item = {
+        "ts": datetime.now().strftime("%Y-%m-%d %I:%M %p"),
+        "Genres": values.get("Genres", ""),
+        "Budget": int(float(values.get("Budget", 0) or 0)),
+        "Runtime": int(float(values.get("Runtime", 0) or 0)),
+        "Popularity": float(values.get("Popularity", 0) or 0),
+        "Vote_Average": float(values.get("Vote_Average", 0) or 0),
+        "Vote_Count": int(float(values.get("Vote_Count", 0) or 0)),
+        "Release_Year": int(float(values.get("Release_Year", 0) or 0)),
+        "Release_Month": int(float(values.get("Release_Month", 0) or 0)),
+        "revenue_fmt": result.get("revenue_fmt", "0"),
+        "prob_fmt": result.get("prob_fmt", "0.0"),
+        "verdict": result.get("verdict", "—"),
+        "is_success": bool(result.get("is_success", False)),
+    }
+    history.insert(0, item)
+    session["history"] = history[:10]
+
 
 @app.route("/", methods=["GET"])
 def index():
@@ -393,6 +416,8 @@ def predict():
         }
         session["engineered"] = engineered
         session["error"] = None
+
+        add_to_history(values, session["result"])
 
         return redirect(url_for("results"))
 
@@ -490,6 +515,18 @@ def what_if_budget():
 
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 400
+
+@app.route("/history", methods=["GET"])
+def history():
+    items = session.get("history", [])
+    values = session.get("values", DEFAULT_VALUES)
+    return render_template("history.html", **common_context(values, None, None, None), history=items)
+
+
+@app.route("/history/clear", methods=["POST"])
+def history_clear():
+    session["history"] = []
+    return redirect(url_for("history"))
 
 
 if __name__ == "__main__":
