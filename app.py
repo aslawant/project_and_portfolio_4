@@ -363,10 +363,15 @@ def _predict_from_values(values: dict) -> dict:
         "prob_fmt": f"{prob * 100:.1f}",
     }
 
+
 def add_to_history(values: dict, result: dict) -> None:
     """Store recent predictions in session (keeps last 10)."""
     history = session.get("history", [])
+
     item = {
+        "id": datetime.now().timestamp(),  
+        "favorite": False,
+
         "ts": datetime.now().strftime("%Y-%m-%d %I:%M %p"),
         "Genres": values.get("Genres", ""),
         "Budget": int(float(values.get("Budget", 0) or 0)),
@@ -376,11 +381,13 @@ def add_to_history(values: dict, result: dict) -> None:
         "Vote_Count": int(float(values.get("Vote_Count", 0) or 0)),
         "Release_Year": int(float(values.get("Release_Year", 0) or 0)),
         "Release_Month": int(float(values.get("Release_Month", 0) or 0)),
+
         "revenue_fmt": result.get("revenue_fmt", "0"),
         "prob_fmt": result.get("prob_fmt", "0.0"),
         "verdict": result.get("verdict", "—"),
         "is_success": bool(result.get("is_success", False)),
     }
+
     history.insert(0, item)
     session["history"] = history[:10]
 
@@ -516,11 +523,25 @@ def what_if_budget():
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 400
 
+
 @app.route("/history", methods=["GET"])
 def history():
     items = session.get("history", [])
+    # favorites first, then newest
+    items = sorted(items, key=lambda x: (not x.get("favorite", False), -float(x.get("id", 0))))
     values = session.get("values", DEFAULT_VALUES)
     return render_template("history.html", **common_context(values, None, None, None), history=items)
+
+
+@app.route("/history/toggle/<float:item_id>", methods=["POST"])
+def history_toggle(item_id):
+    history_list = session.get("history", [])
+    for h in history_list:
+        if float(h.get("id", -1)) == float(item_id):
+            h["favorite"] = not h.get("favorite", False)
+            break
+    session["history"] = history_list
+    return redirect(url_for("history"))
 
 
 @app.route("/history/clear", methods=["POST"])

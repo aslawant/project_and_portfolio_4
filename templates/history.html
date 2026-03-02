@@ -29,7 +29,7 @@
     <header class="header">
       <div>
         <h1>Prediction History</h1>
-        <p class="sub">Your last 10 predictions.</p>
+        <p class="sub">Your last 10 predictions. Star your favorites ⭐</p>
       </div>
     </header>
 
@@ -40,6 +40,7 @@
             <table class="table">
               <thead>
                 <tr>
+                  <th>Fav</th>
                   <th>Time</th>
                   <th>Genre</th>
                   <th>Budget</th>
@@ -53,6 +54,19 @@
               <tbody>
                 {% for h in history %}
                   <tr>
+                    <td>
+                      <form method="POST" action="{{ url_for('history_toggle', item_id=h.id) }}">
+                        <button
+                          type="submit"
+                          class="star-btn {% if h.favorite %}is-fav{% endif %}"
+                          aria-label="{% if h.favorite %}Unfavorite{% else %}Favorite{% endif %}"
+                          title="{% if h.favorite %}Saved as favorite{% else %}Save as favorite{% endif %}"
+                        >
+                          {% if h.favorite %}★{% else %}☆{% endif %}
+                        </button>
+                      </form>
+                    </td>
+
                     <td class="mono">{{ h.ts }}</td>
                     <td>{{ h.Genres }}</td>
                     <td class="mono">${{ "{:,.0f}".format(h.Budget) }}</td>
