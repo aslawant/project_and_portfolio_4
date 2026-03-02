@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prediction History</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="appbar">
+      <a class="brand" href="{{ url_for('index') }}" aria-label="Home">
+        <div class="logo"></div>
+        <div class="brand-title">
+          <div class="title">Movie Success Predictor</div>
+          <div class="subtitle">Prediction History</div>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <button class="btn ghost theme-toggle" type="button" id="themeToggle" aria-label="Toggle theme">
+          🌙 <span class="theme-text">Dark</span>
+        </button>
+        <a class="btn ghost" href="{{ url_for('index') }}">New Prediction</a>
+      </div>
+    </div>
+
+    <header class="header">
+      <div>
+        <h1>Prediction History</h1>
+        <p class="sub">Your last 10 predictions.</p>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="card">
+        {% if history and history|length > 0 %}
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Genre</th>
+                  <th>Budget</th>
+                  <th>Popularity</th>
+                  <th>Rating</th>
+                  <th>Revenue</th>
+                  <th>Prob</th>
+                  <th>Verdict</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for h in history %}
+                  <tr>
+                    <td class="mono">{{ h.ts }}</td>
+                    <td>{{ h.Genres }}</td>
+                    <td class="mono">${{ "{:,.0f}".format(h.Budget) }}</td>
+                    <td class="mono">{{ "%.1f"|format(h.Popularity) }}</td>
+                    <td class="mono">{{ "%.1f"|format(h.Vote_Average) }}</td>
+                    <td class="mono">${{ h.revenue_fmt }}</td>
+                    <td class="mono">{{ h.prob_fmt }}%</td>
+                    <td class="mono">{{ h.verdict }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <form method="POST" action="{{ url_for('history_clear') }}" style="margin-top: 14px;">
+            <button class="btn ghost" type="submit">Clear History</button>
+          </form>
+        {% else %}
+          <p class="muted">No history yet. Run a prediction first.</p>
+        {% endif %}
+      </section>
+
+      <div class="actions" style="margin-top: 14px;">
+        <a class="btn ghost" href="{{ url_for('index') }}">Back Home</a>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const saved = localStorage.getItem("theme");
+      const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+      const initial = saved || (prefersLight ? "light" : "dark");
+      root.dataset.theme = initial;
+
+      function updateLabel() {
+        const btn = document.getElementById("themeToggle");
+        if (!btn) return;
+        const isLight = root.dataset.theme === "light";
+        btn.querySelector(".theme-text").textContent = isLight ? "Light" : "Dark";
+        btn.firstChild.textContent = isLight ? "☀️ " : "🌙 ";
+      }
+
+      updateLabel();
+
+      const toggle = document.getElementById("themeToggle");
+      if (toggle) {
+        toggle.addEventListener("click", () => {
+          const next = root.dataset.theme === "light" ? "dark" : "light";
+          root.dataset.theme = next;
+          localStorage.setItem("theme", next);
+          updateLabel();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
